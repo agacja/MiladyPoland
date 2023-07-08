@@ -44,7 +44,7 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
     mapping(address => string) public githubAccounts;
     string private baseURI;
 
-    // 646576656c6f706d656e74
+
     constructor(address receiver) ERC721A("MiladyPoland", "MPL") {
         _mintERC2309(receiver, RESERVED_NFTS);
     }
