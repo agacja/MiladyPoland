@@ -35,27 +35,23 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
     uint256 public constant MaxPaidPerWallet = 5;
     uint256 public constant PRICE_UNIT = 0.0003 ether;
 
+    // This is constant
     address constant MILADY_TOKEN_CONTRACT =
         0x5Af0D9827E0c53E4799BB226655A1de152A425a5;
 
+    // This will point to Cebula.sol upon the deployment
     address constant CEBULA_TOKEN_CONTRACT =
         0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A;
 
-    mapping(address => string) public githubAccounts;
+    // We'll move it offchain to be returned by our backend - since each modification would require gas from our end.
+    // mapping(address => string) public githubAccounts;
     string private baseURI;
-
 
     constructor(address receiver) ERC721A("MiladyPoland", "MPL") {
         _mintERC2309(receiver, RESERVED_NFTS);
     }
 
-    function _baseURI()
-        internal
-        view
-        virtual
-        override
-        returns (string memory)
-    {
+    function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
@@ -141,18 +137,25 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
         return nftBalance;
     }
 
-    function MiladyMint(uint256 quantity) external payable {
+    modifier requireSignature(bytes calldata signature) {
+        require(
+            keccak256(abi.encode(msg.sender)).toEthSignedMessageHash().recover(
+                signature
+            ) == signer,
+            "Invalid signature."
+        );
+        _;
+    }
+
+    function miladyMint(
+        uint256 quantity,
+        bytes calldata signature
+    ) external payable requireSignature(signature) {
         unchecked {
-            if (getNFTBalance(msg.sender, MILADY_TOKEN_CONTRACT) < 1)
-                revert NotYou();
             if (_totalMinted() + quantity > maxMiladyMint + RESERVED_NFTS)
                 revert OutOfStock();
             if (saleState != SALE_STATE_FREE || saleState == 0)
                 revert FreeSaleNoMore();
-            if (
-                (_numberMinted(msg.sender) - _getAux(msg.sender)) + quantity >
-                MaxFreePerWallet
-            ) revert WalletLimitExceeded();
         }
 
         _mint(msg.sender, quantity);
@@ -207,13 +210,6 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
             require(maxSupply != 0, "max supply not set");
         }
         saleState = value;
-    }
-
-    function setGitHubAccount(
-        address _target,
-        string calldata _account
-    ) external onlyOwner {
-        githubAccounts[_target] = _account;
     }
 
     function solveRiddle(

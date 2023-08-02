@@ -29,8 +29,6 @@ contract Cebula is Owned(msg.sender), ERC721AQueryable {
     }
 
     function curse(address _target) public {
-        console.log(msg.sender);
-        console.log(owner);
         if (msg.sender != MILADYPOLAND_CONTRACT) {
             revert NotYou();
         }
