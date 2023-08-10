@@ -44,7 +44,6 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
 
     address constant CEBULA_TOKEN_CONTRACT =
     // !!!!This is an example address !!!!
-    //Cebula will be deployed before MiladyPoland and we will change this 
        0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A; 
 
 
