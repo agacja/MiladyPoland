@@ -4,52 +4,91 @@ pragma solidity ^0.8.16;
 
 error WalletLimitExceeded();
 error NoMoney();
-error PriceMustbemultipleofunit();
-error FreeSaleNoMore();
-error GeneralMintClosed();
-error Locked();
 error OutOfStock();
 error NotYou();
 error BaseURIIsLocked();
 error WrongPassword();
+error SaleClosed();
 
-import "lib/ERC721A/contracts/extensions/ERC721AQueryable.sol";
-import "lib/solady/src/utils/SafeTransferLib.sol";
-import "lib/solmate/src/auth/Owned.sol";
-import "lib/solady/src/utils/LibString.sol";
-import "forge-std/Test.sol";
+import "lib/ERC721A/ERC721AQueryable.sol";
+import "lib/solady/SafeTransferLib.sol";
+import "lib/solmate/Owned.sol";
+import "lib/solady/LibString.sol";
+import "lib/solady/ECDSA.sol";
+
 
 contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
+    using ECDSA for bytes32;
+
     uint8 public saleState;
     uint8 private baseURILocked = 1;
     uint8 public constant SALE_STATE_CLOSED = 0;
-    uint8 public constant SALE_STATE_FREE = 1;
-    uint8 public constant SALE_STATE_GENERAL = 2;
-
-    uint16 private _publicPriceUnits;
+   
 
     uint256 public constant RESERVED_NFTS = 5;
     uint256 public constant maxSupply = 2000;
     uint256 public constant maxMiladyMint = 3;
     uint256 public constant MaxFreePerWallet = 1;
     uint256 public constant MaxPaidPerWallet = 5;
-    uint256 public constant PRICE_UNIT = 0.0003 ether;
+    uint256 public  constant price = 0.03 ether;
+    string private baseURI;
+    address public signer;
 
-    // This is constant
+    /// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.16;
+
+error WalletLimitExceeded();
+error NoMoney();
+error OutOfStock();
+error BaseURIIsLocked();
+error WrongPassword();
+error SaleClosed();
+error NotScatter();
+error NotOwner();
+error MiladyLimitExceeded();
+error NoMilady();
+
+
+
+import "erc721a/contracts/extensions/ERC721AQueryable.sol";
+import "./SafeTransferLib.sol";
+import "./Owned.sol";
+import "./LibString.sol";
+import "./ECDSA.sol";
+
+
+
+contract awokad is Owned(msg.sender), ERC721AQueryable {
+    using ECDSA for bytes32;
+
+    uint8 public saleState;
+    uint8 private baseURILocked = 1;
+    uint8 public constant SALE_STATE_CLOSED = 1;
+   
+
+    uint256 public constant RESERVED_NFTS = 5;
+    uint256 public constant maxSupply = 2000;
+    uint256 public constant maxMiladyMint = 1;
+    uint256 public constant MaxPaidPerWallet = 5;
+    uint256 public  constant price = 0.03 ether;
+    string private baseURI;
+    address public signer;
+
     address constant MILADY_TOKEN_CONTRACT =
         0x5Af0D9827E0c53E4799BB226655A1de152A425a5;
 
-    // This will point to Cebula.sol upon the deployment
     address constant CEBULA_TOKEN_CONTRACT =
-        0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A;
+    // !!!!This is an example address !!!!
+    //Cebula will be deployed before MiladyPoland and we will change this 
+       0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A; 
 
-    // We'll move it offchain to be returned by our backend - since each modification would require gas from our end.
-    // mapping(address => string) public githubAccounts;
-    string private baseURI;
 
     constructor(address receiver) ERC721A("MiladyPoland", "MPL") {
         _mintERC2309(receiver, RESERVED_NFTS);
     }
+
+
 
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
@@ -58,18 +97,9 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
     function _startTokenId() internal view virtual override returns (uint256) {
         return 1;
     }
+    
 
-    function _toPriceUnits(uint256 price) private pure returns (uint16) {
-        unchecked {
-            if (price % PRICE_UNIT != 0) revert PriceMustbemultipleofunit();
-            require((price /= PRICE_UNIT) <= type(uint16).max, "Overflow.");
-            return uint16(price);
-        }
-    }
 
-    function _toPrice(uint16 priceUnits) private pure returns (uint256) {
-        return uint256(priceUnits) * PRICE_UNIT;
-    }
 
     function _mintCebula(address _to) internal {
         if (getNFTBalance(_to, CEBULA_TOKEN_CONTRACT) < 1) {
@@ -137,38 +167,40 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
         return nftBalance;
     }
 
-    modifier requireSignature(bytes calldata signature) {
-        require(
-            keccak256(abi.encode(msg.sender)).toEthSignedMessageHash().recover(
-                signature
-            ) == signer,
-            "Invalid signature."
-        );
-        _;
-    }
-
-    function miladyMint(
+    function MiladyMint(
         uint256 quantity,
         bytes calldata signature
-    ) external payable requireSignature(signature) {
+    ) external payable requireSignature(signature) 
+    {
+        if (getNFTBalance(msg.sender, MILADY_TOKEN_CONTRACT) < 1)
+        revert NoMilady();
         unchecked {
+
+              
             if (_totalMinted() + quantity > maxMiladyMint + RESERVED_NFTS)
                 revert OutOfStock();
-            if (saleState != SALE_STATE_FREE || saleState == 0)
-                revert FreeSaleNoMore();
+
+                 if (
+                (_numberMinted(msg.sender) - _getAux(msg.sender)) + quantity >
+                maxMiladyMint
+            ) revert MiladyLimitExceeded();
+        
+
+            if ( saleState == 1)
+                revert SaleClosed();
         }
 
         _mint(msg.sender, quantity);
         _mintCebula(msg.sender);
     }
 
-    function mint(
-        uint256 quantity
-    ) external payable requireExactPayment(_publicPriceUnits, quantity) {
+    function mint (uint256 quantity) external payable {
+     
         unchecked {
+             if (msg.value < price * quantity) revert NoMoney();
             if (_totalMinted() + quantity > maxSupply) revert OutOfStock();
-            if (saleState != SALE_STATE_GENERAL || saleState == 0)
-                revert GeneralMintClosed();
+            if ( saleState == 1)
+                revert SaleClosed();
             if (
                 (_numberMinted(msg.sender) - _getAux(msg.sender)) + quantity >
                 MaxPaidPerWallet
@@ -179,20 +211,8 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
         _mintCebula(msg.sender);
     }
 
-    modifier requireExactPayment(uint16 priceUnits, uint256 quantity) {
-        unchecked {
-            if (msg.value != _toPrice(priceUnits) * quantity) revert NoMoney();
-        }
-        _;
-    }
+ 
 
-    function setPublicPrice(uint256 value) external onlyOwner {
-        _publicPriceUnits = _toPriceUnits(value);
-    }
-
-    function withdraw() external payable onlyOwner {
-        SafeTransferLib.safeTransferETH(msg.sender, address(this).balance);
-    }
 
     //@dev URI functions.
 
@@ -206,11 +226,51 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
     }
 
     function setSaleState(uint8 value) external onlyOwner {
-        if (saleState != 0) {
+        if (saleState != 1) {
             require(maxSupply != 0, "max supply not set");
         }
         saleState = value;
     }
+
+    modifier requireSignature(bytes calldata signature) {
+        require(
+            keccak256(abi.encode(msg.sender)).toEthSignedMessageHash().recover(
+                signature
+            ) == signer,
+            "Invalid signature."
+        );
+        _;
+    
+    }
+
+
+
+    function setSigner(address value) external onlyOwner {
+        signer = value;
+    }
+
+
+        function Withdraw() external onlyOwner  {
+        address owner = 0x13d8cc1209A8a189756168AbEd747F2b050D075f;
+        address scatter = 0x86B82972282Dd22348374bC63fd21620F7ED847B;
+        uint256 contractBalance = address(this).balance;
+        uint256 scatterAmount = (contractBalance * 5) / 100;
+        uint256 normalWalletAmount = contractBalance - scatterAmount;
+        
+         // Transfer 5% to Scatter
+        (bool success1, ) = scatter.call{value: scatterAmount}("");
+        if (success1 == false) revert NotScatter();
+        
+        // Transfer 95% to the Owner
+        
+        (bool success2, ) = owner.call{value: normalWalletAmount}("");  
+       if(success2 == false ) revert NotOwner();
+    }
+    
+    receive() external payable {}
+
+
+}
 
     function solveRiddle(
         string memory _password
