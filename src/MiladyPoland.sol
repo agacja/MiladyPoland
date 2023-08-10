@@ -5,42 +5,6 @@ pragma solidity ^0.8.16;
 error WalletLimitExceeded();
 error NoMoney();
 error OutOfStock();
-error NotYou();
-error BaseURIIsLocked();
-error WrongPassword();
-error SaleClosed();
-
-import "lib/ERC721A/ERC721AQueryable.sol";
-import "lib/solady/SafeTransferLib.sol";
-import "lib/solmate/Owned.sol";
-import "lib/solady/LibString.sol";
-import "lib/solady/ECDSA.sol";
-
-
-contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
-    using ECDSA for bytes32;
-
-    uint8 public saleState;
-    uint8 private baseURILocked = 1;
-    uint8 public constant SALE_STATE_CLOSED = 0;
-   
-
-    uint256 public constant RESERVED_NFTS = 5;
-    uint256 public constant maxSupply = 2000;
-    uint256 public constant maxMiladyMint = 3;
-    uint256 public constant MaxFreePerWallet = 1;
-    uint256 public constant MaxPaidPerWallet = 5;
-    uint256 public  constant price = 0.03 ether;
-    string private baseURI;
-    address public signer;
-
-    /// SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.16;
-
-error WalletLimitExceeded();
-error NoMoney();
-error OutOfStock();
 error BaseURIIsLocked();
 error WrongPassword();
 error SaleClosed();
@@ -50,16 +14,15 @@ error MiladyLimitExceeded();
 error NoMilady();
 
 
-
-import "erc721a/contracts/extensions/ERC721AQueryable.sol";
-import "./SafeTransferLib.sol";
-import "./Owned.sol";
-import "./LibString.sol";
-import "./ECDSA.sol";
-
+import "lib/ERC721A/ERC721AQueryable.sol";
+import "lib/solady/SafeTransferLib.sol";
+import "lib/solmate/Owned.sol";
+import "lib/solady/LibString.sol";
+import "lib/solady/ECDSA.sol";
 
 
-contract awokad is Owned(msg.sender), ERC721AQueryable {
+
+contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
     using ECDSA for bytes32;
 
     uint8 public saleState;
@@ -75,17 +38,17 @@ contract awokad is Owned(msg.sender), ERC721AQueryable {
     string private baseURI;
     address public signer;
 
+
     address constant MILADY_TOKEN_CONTRACT =
         0x5Af0D9827E0c53E4799BB226655A1de152A425a5;
 
-
- // !!!!This is an example address !!!!
-    //We will change it
     address constant CEBULA_TOKEN_CONTRACT =
+    // !!!!This is an example address !!!!
+    //Cebula will be deployed before MiladyPoland and we will change this 
        0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A; 
 
 
-    constructor(address receiver) ERC721A("MiladyPoland", "MPL") {
+  constructor(address receiver) ERC721A("MiladyPoland", "MPL") {
         _mintERC2309(receiver, RESERVED_NFTS);
     }
 
