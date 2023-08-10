@@ -78,9 +78,10 @@ contract awokad is Owned(msg.sender), ERC721AQueryable {
     address constant MILADY_TOKEN_CONTRACT =
         0x5Af0D9827E0c53E4799BB226655A1de152A425a5;
 
+
+ // !!!!This is an example address !!!!
+    //We will change it
     address constant CEBULA_TOKEN_CONTRACT =
-    // !!!!This is an example address !!!!
-    //Cebula will be deployed before MiladyPoland and we will change this 
        0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A; 
 
 
