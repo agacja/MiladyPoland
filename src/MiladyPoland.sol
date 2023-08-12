@@ -11,7 +11,7 @@ error SaleClosed();
 error NotScatter();
 error NotOwner();
 error MiladyLimitExceeded();
-error NoMilady();
+error NoMiladyOrPolacy();
 
 
 import "lib/ERC721A/ERC721AQueryable.sol";
@@ -31,6 +31,7 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
 
     uint256 public constant RESERVED_NFTS = 5;
     uint256 public constant maxSupply = 2000;
+    uint256 public constant FreeSupply = 666;
     uint256 public constant maxMiladyMint = 1;
     uint256 public constant MaxPaidPerWallet = 5;
     uint256 public  constant price = 0.03 ether;
@@ -40,6 +41,9 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
 
     address constant MILADY_TOKEN_CONTRACT =
     0x5Af0D9827E0c53E4799BB226655A1de152A425a5;
+
+    address constant POLACY_CONTRACT= 
+    0x99903e8eC87b9987bD6289DF8eff178d6E533561;
 
     address constant CEBULA_TOKEN_CONTRACT =
     // !!!!This is an example address !!!!
@@ -113,17 +117,19 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
            return nftBalance;
     }
 
-    function MiladyMint(
+     function FrensMint(
         uint256 quantity,
         bytes calldata signature
     ) external payable requireSignature(signature) 
     {
-        if (getNFTBalance(msg.sender, MILADY_TOKEN_CONTRACT) < 1)
-        revert NoMilady();
-        unchecked {
-
+          unchecked {
               
-            if (_totalMinted() + quantity > maxMiladyMint + RESERVED_NFTS)
+     if (getNFTBalance(msg.sender, MILADY_TOKEN_CONTRACT) >= 1 || 
+        getNFTBalance(msg.sender, POLACY_CONTRACT) >= 1) {
+         } else {
+        revert NoMiladyOrPolacy();
+    }
+            if ( FreeSupply + quantity > maxMiladyMint + RESERVED_NFTS)
                 revert OutOfStock();
 
                  if (
@@ -132,7 +138,7 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
             ) revert MiladyLimitExceeded();
         
 
-            if ( saleState == 1)
+            if ( saleState == 0)
                 revert SaleClosed();
         }
 
