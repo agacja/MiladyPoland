@@ -1,22 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.16;
+pragma solidity ^0.8.16;
 
-error WalletLimitExceeded();
-error PriceMustbemultipleofunit();
-error OutOfStock();
 error NotYou();
-error NotTokenOwner();
-error chujciwdupe();
 error Pupsko();
+error BaseURIIsLocked();
 
 import "lib/erc721a/contracts/extensions/ERC721AQueryable.sol";
 import "lib/solmate/src/auth/Owned.sol";
-import "forge-std/Test.sol";
 
 contract Cebula is Owned(msg.sender), ERC721AQueryable {
     address constant MILADYPOLAND_CONTRACT =
-        0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f;
+        0xFF84A1d5f87358089d921D98Cc05fe3529105415;
+    uint8 private baseURILocked = 1;
+    string private baseURI;
 
     constructor(address receiver) ERC721A("Cebula", "PLN") {
         _mintERC2309(receiver, 2);
@@ -33,6 +30,19 @@ contract Cebula is Owned(msg.sender), ERC721AQueryable {
             revert NotYou();
         }
         _mint(_target, 1);
+    }
+
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
+    }
+
+    function setBaseURI(string calldata _uri) external onlyOwner {
+        if (baseURILocked == 2) revert BaseURIIsLocked();
+        baseURI = _uri;
+    }
+
+    function lockBaseURI() external onlyOwner {
+        baseURILocked = 2;
     }
 
     function transferFrom(
