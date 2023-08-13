@@ -149,7 +149,7 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
     function mint (uint256 quantity) external payable {
      
         unchecked {
-         if (msg.value < price * quantity) revert NoMoney();
+         if (msg.value != price * quantity) revert NoMoney();
          if (_totalMinted() + quantity > maxSupply) revert OutOfStock();
          if ( saleState == 0)
                 revert SaleClosed();
