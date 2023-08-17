@@ -41,7 +41,7 @@ contract MiladyPoland is Owned(msg.sender), ERC721AQueryable {
         0x99903e8eC87b9987bD6289DF8eff178d6E533561;
 
     address constant CEBULA_TOKEN_CONTRACT =
-        // !!!!This is an example address !!!!
+     
         0x2c988006cE2bCE9Fee125D6a98863b7eB6B8657A;
 
     constructor(address receiver) ERC721A("MiladyPoland", "MPL") {
