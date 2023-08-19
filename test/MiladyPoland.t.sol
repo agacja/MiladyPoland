@@ -17,13 +17,18 @@ contract MiladyPolandTest is Test {
     address public kryptopaul = 0x60D4496FfaeF491e6BE88D55dcB511F513390486;
     address public pehu = 0x07D3088a697DC1647413E0B7393746Dd2D6c8A55;
 
+    address public deployer = 0x13d8cc1209A8a189756168AbEd747F2b050D075f;
+
     function setUp() public {
+        vm.deal(randomUser, 100 ether);
+        vm.startPrank(deployer);
         miladyPoland = new MiladyPoland(
             0x10A8Fc644A4135EF9f11A56b05Ab7c5eA7888c33
         );
         miladyPoland.setSaleState(1);
 
         cebula = new Cebula(0x10A8Fc644A4135EF9f11A56b05Ab7c5eA7888c33);
+        vm.stopPrank();
         console.log("MiladyPoland: %s", address(miladyPoland));
         console.log("Cebula: %s", address(cebula));
     }
@@ -51,22 +56,22 @@ contract MiladyPolandTest is Test {
     // Milady Mint section
     function test_MiladyHolder_CanMint() public {
         vm.prank(kryptopaul);
-        miladyPoland.MiladyMint(1);
+        miladyPoland.FrensMint(1, "0x25a058f1958de934031b0b183dcbfa6e2208aee14a265a776f8690cc3d20cff2364d6d10cdf9108d74dcb12c8bb917a33daafcc9a0565bc4030bdac656df0ff41c");
         uint256 balance = miladyPoland.balanceOf(kryptopaul);
         assertEq(balance, 1);
     }
 
     function test_MiladyHolder_CantMint_MoreThanOne() public {
         vm.startPrank(kryptopaul);
-        miladyPoland.MiladyMint(1);
+        miladyPoland.FrensMint(1, "0x25a058f1958de934031b0b183dcbfa6e2208aee14a265a776f8690cc3d20cff2364d6d10cdf9108d74dcb12c8bb917a33daafcc9a0565bc4030bdac656df0ff41c");
         vm.expectRevert();
-        miladyPoland.MiladyMint(1);
+        miladyPoland.FrensMint(1, "0x25a058f1958de934031b0b183dcbfa6e2208aee14a265a776f8690cc3d20cff2364d6d10cdf9108d74dcb12c8bb917a33daafcc9a0565bc4030bdac656df0ff41c");
         vm.stopPrank();
     }
 
     function test_NotMiladyHolder_CantMint() public {
         vm.expectRevert();
-        miladyPoland.MiladyMint(1);
+        miladyPoland.FrensMint(1, "0x25a058f1958de934031b0b183dcbfa6e2208aee14a265a776f8690cc3d20cff2364d6d10cdf9108d74dcb12c8bb917a33daafcc9a0565bc4030bdac656df0ff41c");
     }
 
     // Cebula Mickey Mouse Fuck Shit
@@ -76,38 +81,39 @@ contract MiladyPolandTest is Test {
         assertEq(pehuCebulaBalance, 1);
     }
 
-    function test_MiladyUser_CebulaAndMiladyPolandMints_InEvenBlock(
+    function test_CebulaAndMiladyPolandMints_InEvenBlock(
         uint256 evenBlock
     ) public {
-        vm.assume(evenBlock % 2 == 0);
+        vm.assume(evenBlock % 2 == 0 && evenBlock < 50000 && evenBlock > 1);
         vm.roll(evenBlock);
-
+        console.log(evenBlock);
+        vm.prank(deployer);
         miladyPoland.setSaleState(2);
 
-        vm.prank(kryptopaul);
-        miladyPoland.mint(1);
+        vm.prank(randomUser);
+        miladyPoland.mint{value: 0.03 ether}(1);
 
-        uint256 miladyPolandBalance = miladyPoland.balanceOf(kryptopaul);
-        uint256 cebulaBalance = cebula.balanceOf(kryptopaul);
+        uint256 miladyPolandBalance = miladyPoland.balanceOf(randomUser);
+        uint256 cebulaBalance = cebula.balanceOf(randomUser);
 
         assertEq(miladyPolandBalance, 1);
         assertEq(cebulaBalance, 1);
     }
 
-    function test_MiladyUser_CebulaAndMiladyPolandDoesNotMint_InOddBlock(
+    function test_CebulaAndMiladyPolandDoesNotMint_InOddBlock(
         uint256 evenBlock
     ) public {
-        vm.assume(evenBlock % 2 != 0);
+        vm.assume(evenBlock % 2 != 0 && evenBlock < 50000);
         vm.roll(evenBlock);
-
+        vm.prank(deployer);
         miladyPoland.setSaleState(2);
 
-        vm.prank(kryptopaul);
+        vm.prank(randomUser);
 
-        miladyPoland.mint(1);
+        miladyPoland.mint{value: 0.03 ether}(1);
 
-        uint256 miladyPolandBalance = miladyPoland.balanceOf(kryptopaul);
-        uint256 cebulaBalance = cebula.balanceOf(kryptopaul);
+        uint256 miladyPolandBalance = miladyPoland.balanceOf(randomUser);
+        uint256 cebulaBalance = cebula.balanceOf(randomUser);
 
         assertEq(miladyPolandBalance, 1);
         assertEq(cebulaBalance, 0);
@@ -120,7 +126,7 @@ contract MiladyPolandTest is Test {
         vm.assume(evenBlock % 2 == 0);
         vm.roll(evenBlock);
         vm.prank(kryptopaul);
-        miladyPoland.MiladyMint(1);
+        miladyPoland.FrensMint(1, "0x25a058f1958de934031b0b183dcbfa6e2208aee14a265a776f8690cc3d20cff2364d6d10cdf9108d74dcb12c8bb917a33daafcc9a0565bc4030bdac656df0ff41c");
 
         uint256 miladyPolandBalance = miladyPoland.balanceOf(kryptopaul);
         uint256 cebulaBalance = cebula.balanceOf(kryptopaul);
