@@ -6,8 +6,8 @@
 ### Contracts
 ```
 src
-    ├─ MiladyPoland -> optimised, partialy written in assembly NFT contract. 
-    You get suprise mint within a mint, depending on a block number 
+    ├─ MiladyPoland -> optimised, partialy written in assembly NFT contract.
+You get suprise mint within a mint, depending on a block number 
     ├─ Cebula -> The suprise contract. A curse. Can't get rid of it.
 ```
 
