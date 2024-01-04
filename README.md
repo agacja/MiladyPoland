@@ -1,6 +1,6 @@
 # Milady Poland
 
-**Optimized NFT project with a suprise**
+**Optimized NFT project with a suprise
 Hint -> it depends on eaven or odd block number**
 
 
