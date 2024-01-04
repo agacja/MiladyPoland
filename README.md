@@ -1,14 +1,15 @@
 # Milady Poland
 
-**Optimized NFT project with a suprise
-Hint -> it depends on eaven or odd block number**
+**Optimized NFT project with a suprise**
 
 
 ### Contracts
+```
 src
     ├─ MiladyPoland -> optimised, partialy written in assembly NFT contract. 
-Minting logic inside mint.
+    You get suprise mint within a mint, depending on a block number 
     ├─ Cebula -> The suprise contract. A curse. Can't get rid of it.
+```
 
 ### Build
 
